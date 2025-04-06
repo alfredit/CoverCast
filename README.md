@@ -3,7 +3,7 @@
 ## Hardware 
 
 * Tested in RPI 4 1GB
-* P3 2121 LED screen : https://a.aliexpress.com/_EvOfDs0
+* P3 2121 LED 64*64 screen : https://a.aliexpress.com/_EvOfDs0
 * Matrix Panel Connector : https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-for-raspberry-pi-v2/
 * Home Assistant ! 
 
