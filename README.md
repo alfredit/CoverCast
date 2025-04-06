@@ -24,7 +24,7 @@ www-data ALL=(ALL) NOPASSWD: /CoverCast/led-image-viewer
 * in config.yml, add a notify part : 
 ```
 notify:
-  - name: musicdisplay
+  - name: covercast
     platform: rest
     resource: http://192.168.31.190/listen.php
 ```
@@ -35,16 +35,16 @@ description: ""
 triggers:
   - trigger: state
     entity_id:
-      - media_player.maison
+      - media_player.home
     attribute: media_title
   - trigger: state
     entity_id:
-      - media_player.spotify_alfredit
+      - media_player.spotify
     to: null
     enabled: true
 conditions: []
 actions:
-  - action: notify.musicdisplay
+  - action: notify.covercast
     data:
       message:
 mode: single
