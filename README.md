@@ -20,7 +20,7 @@ www-data ALL=(ALL) NOPASSWD: /CoverCast/led-image-viewer
 * cp /CoverCast/listen.php /var/www/html/
 
 ### On Home Assistant :
-* create a long lived token in user menu / security tab / "Create Token"
+* create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
 * in config.yml, add a notify part : 
 ```
 notify:
