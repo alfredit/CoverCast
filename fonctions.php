@@ -7,9 +7,8 @@ sleep(1);
 echo "kill task <BR>";
 }
 
-function display_image() {
-shell_exec('sudo /CoverCast/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness=40 --led-daemon');
-
+function display_image($folder) {
+shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness=40 --led-daemon');
 //shell_exec('sudo -u www-data /CoverCast/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness=40 --led-daemon');
 echo "display image <BR>";
 

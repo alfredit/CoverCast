@@ -11,6 +11,6 @@ kill_process();
 
 get_ha_image($ha_url, $long_lived_access_token);
 
-display_image();
+display_image($folder);
 
 ?>
