@@ -6,13 +6,13 @@ error_reporting(E_ALL);
 require_once 'settings.php';
 require_once 'fonctions.php';
 
-if (isset($_GET["todo"])) {
-	if ($_GET["todo"] == "refresh") {
+if (isset($_GET["message"])) {
+	if ($_GET["message"] == "refresh") {
 		kill_process();
 		get_ha_image($ha_url, $long_lived_access_token);
 		display_image($folder);
 	}
-        if ($_GET["todo"] == "kill") {
+        if ($_GET["message"] == "kill") {
                 kill_process();
         }
 }
