@@ -1,7 +1,6 @@
 # CoverCast
 
 ## Hardware 
-
 * Tested in RPI 4 1GB
 * P3 2121 LED 64*64 screen : https://a.aliexpress.com/_EvOfDs0
 * Matrix Panel Connector : https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-for-raspberry-pi-v2/
@@ -25,28 +24,27 @@ www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 notify:
   - name: covercast
     platform: rest
-    resource: http://192.168.31.190/CoverCast/app.php
+    resource: http://RASPBERRY_IP/CoverCast/app.php?message={{ message }}
 ```
 * create an automation : 
 ```
-alias: MGMT-MUSIC-DISPLAY
+alias: MGMT-COVER-CAST
 description: ""
 triggers:
   - trigger: state
     entity_id:
-      - media_player.home
+      - media_player.maison
     attribute: media_title
   - trigger: state
     entity_id:
-      - media_player.spotify
+      - media_player.spotify_alfredit
     to: null
     enabled: true
 conditions: []
 actions:
   - action: notify.covercast
+    metadata: {}
     data:
-      message:
+      message: refresh
 mode: single
 ```
-
-
