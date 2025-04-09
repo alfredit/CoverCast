@@ -6,11 +6,15 @@ error_reporting(E_ALL);
 require_once 'settings.php';
 require_once 'fonctions.php';
 
-
-kill_process();
-
-get_ha_image($ha_url, $long_lived_access_token);
-
-display_image($folder);
+if (isset($_GET["todo"])) {
+	if ($_GET["todo"] == "refresh") {
+		kill_process();
+		get_ha_image($ha_url, $long_lived_access_token);
+		display_image($folder);
+	}
+        if ($_GET["todo"] == "kill") {
+                kill_process();
+        }
+}
 
 ?>

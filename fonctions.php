@@ -3,6 +3,8 @@
 function kill_process() {
 
 shell_exec('pkill -f led-image-viewer');
+shell_exec('rm ha_media_artwork.jpg');
+
 sleep(1);
 echo "kill task <BR>";
 }
