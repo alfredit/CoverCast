@@ -10,14 +10,13 @@
 ## Install : 
 
 ### On Raspberry : 
-* clone this repo in /CoverCast
+* clone this repo in /var/www/html/CoverCast
 * visudo, add those lines under the root:ALL : 
 ```
-www-data ALL=(ALL) NOPASSWD: /CoverCast/music.sh
-www-data ALL=(ALL) NOPASSWD: /CoverCast/led-image-viewer
+www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
+
 ```
 * apt install php, apache2
-* cp /CoverCast/listen.php /var/www/html/
 
 ### On Home Assistant :
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
@@ -26,7 +25,7 @@ www-data ALL=(ALL) NOPASSWD: /CoverCast/led-image-viewer
 notify:
   - name: covercast
     platform: rest
-    resource: http://192.168.31.190/listen.php
+    resource: http://192.168.31.190/CoverCast/app.php
 ```
 * create an automation : 
 ```
