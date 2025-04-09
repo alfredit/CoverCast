@@ -10,6 +10,7 @@
 
 ### On Raspberry : 
 * clone this repo in /var/www/html/CoverCast
+* cp settings.php.BLANK settings.php
 * visudo, add those lines under the root:ALL : 
 ```
 www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
@@ -20,6 +21,8 @@ www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 ### On Home Assistant :
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
 * in config.yml, add a notify part : 
+* back to raspberry, edit settings.php file and add API url, token and music/tv api url 
+
 ```
 notify:
   - name: covercast
