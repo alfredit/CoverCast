@@ -28,23 +28,71 @@ notify:
 ```
 * create an automation : 
 ```
-alias: MGMT-COVER-CAST
+alias: MGMT-COVERCAST
 description: ""
 triggers:
   - trigger: state
     entity_id:
-      - media_player.maison
-    attribute: media_title
+      - media_player.music
+    to: playing
+    enabled: true
+    id: MUSIC
   - trigger: state
     entity_id:
-      - media_player.spotify_alfredit
-    to: null
+      - media_player.tv
+    to: playing
+    id: TV
+  - trigger: state
+    entity_id:
+      - media_player.music
+    to: "off"
     enabled: true
-conditions: []
+    id: KILL
+  - trigger: state
+    entity_id:
+      - media_player.tv
+    to: standby
+    id: KILL
+conditions:
 actions:
-  - action: notify.covercast
-    metadata: {}
-    data:
-      message: refresh
+  - if:
+      - condition: trigger
+        id:
+          - MUSIC
+    then:
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshmusic
+    alias: MUSIC ON
+  - if:
+      - condition: trigger
+        id:
+          - TV
+    then:
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshtv
+    alias: TV ON
+  - alias: KILL
+    if:
+      - condition: trigger
+        id:
+          - KILL
+    then:
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: kill
 mode: single
 ```
+
+
+## API Usaege
+
+URL : IP_RASPBERRY/CoverCast/app.php?message?=
+* refreshmusic : get the image in the music url in settings and refresh the screen
+* refreshtv : get the image in the tv url in settings and refresh the screen
+* kill : turs off the screen
+
