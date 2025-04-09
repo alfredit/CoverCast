@@ -1,0 +1,14 @@
+<?php
+
+// API  URL OF THE MUSIC MEDIA PLAYER
+$ha_url_music = 'http://RASPBERRY_IP:8123/api/media_player_proxy/media_player.music';
+
+// API  URL OF THE TV MEDIA PLAYER IF EXIST
+$ha_url_tv = 'http:////RASPBERRY_IP:8123/api/media_player_proxy/media_player.tv';
+
+// TOKEN TO GET IN HOME ASSISTANT CF README
+$long_lived_access_token = 'MYTOKEN';
+
+// FOLDER TO ACCESS THE COVERCAST INSTALL
+$folder = '/var/www/html/CoverCast';
+
