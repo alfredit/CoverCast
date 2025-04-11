@@ -16,7 +16,7 @@
 ```
 www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 ```
-* apt install php, apache2
+* apt install php, apache2, imagemagick
 
 ### On Home Assistant :
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
