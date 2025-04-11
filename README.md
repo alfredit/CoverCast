@@ -22,6 +22,7 @@ www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 
 ### On Home Assistant :
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
+* create a helper : Settings -> devices -> helpers -> type number, name "covercast-brightness" between 1-99. It will set the brightness value for day and eco setting in the automation
 * back to raspberry, edit settings.php file and add API url, token and music/tv api url 
 * in config.yml, add a notify part :
 ```
@@ -30,55 +31,78 @@ notify:
     platform: rest
     resource: http://RASPBERRY_IP/CoverCast/app.php?message={{ message }}
 ```
-* create an automation : 
+* create an automation, you may edit the day and eco value of the brihtness and the name of your media_players : 
 ```
 alias: MGMT-COVERCAST
 description: ""
 triggers:
   - trigger: state
     entity_id:
-      - media_player.music
+      - media_player.maison
     to: playing
     enabled: true
     id: MUSIC
   - trigger: state
     entity_id:
-      - media_player.tv
+      - media_player.sejour
     to: playing
     id: TV
   - trigger: state
     entity_id:
-      - media_player.music
+      - media_player.maison
     to: "off"
     enabled: true
     id: KILL
   - trigger: state
     entity_id:
-      - media_player.tv
+      - media_player.sejour
     to: standby
     id: KILL
+  - trigger: sun
+    event: sunrise
+    offset: 0
+    alias: brightness-day
+    id: brightness-day
+  - alias: brightness-eco
+    trigger: sun
+    event: sunset
+    offset: 0
+    id: brightness-eco
 conditions:
+  - condition: state
+    entity_id: input_boolean.anyone_home
+    state: "on"
 actions:
-  - if:
+  - alias: MUSIC ON
+    if:
       - condition: trigger
         id:
           - MUSIC
     then:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
       - action: notify.covercast
         metadata: {}
         data:
-          message: refreshmusic
-    alias: MUSIC ON
-  - if:
+          message: refreshmusic-{{states.input_number.covercast_brightness.state}}
+  - alias: TV ON
+    if:
       - condition: trigger
         id:
           - TV
     then:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
       - action: notify.covercast
         metadata: {}
         data:
-          message: refreshtv
-    alias: TV ON
+          message: refreshtv-{{states.input_number.covercast_brightness.state}}
   - alias: KILL
     if:
       - condition: trigger
@@ -89,6 +113,28 @@ actions:
         metadata: {}
         data:
           message: kill
+  - if:
+      - condition: trigger
+        id:
+          - brightness-day
+    then:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 40
+    alias: Brightness-day
+  - alias: Brightness-eco
+    if:
+      - condition: trigger
+        id:
+          - brightness-eco
+    then:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 15
 mode: single
 ```
 
@@ -100,7 +146,7 @@ sequence:
   - action: notify.covercast
     metadata: {}
     data:
-      message: refreshmusic
+      message: refreshmusic-{{states.input_number.covercast_brightness.state}}
 alias: REFRESH-COVERCAST
 description: ""
 ```
