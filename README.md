@@ -1,8 +1,9 @@
 # CoverCast
 
 ## Hardware 
-* Tested in RPI 4 1GB
-* P3 2121 LED 64*64 screen : https://a.aliexpress.com/_EvOfDs0
+* Tested with RPI 4 1GB and Zero 2 w
+* P3 2121 LED 64*64 screen : https://fr.aliexpress.com/item/32931309452.html
+* 5v 3 amp https://fr.aliexpress.com/item/1005005763465796.html
 * Matrix Panel Connector : https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-for-raspberry-pi-v2/
 * Home Assistant ! 
 
@@ -14,7 +15,6 @@
 * visudo, add those lines under the root:ALL : 
 ```
 www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
-
 ```
 * apt install php, apache2
 
@@ -22,7 +22,6 @@ www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
 * back to raspberry, edit settings.php file and add API url, token and music/tv api url 
 * in config.yml, add a notify part :
-
 ```
 notify:
   - name: covercast
@@ -91,6 +90,28 @@ actions:
 mode: single
 ```
 
+You can add those two scripts, one to force refresh the image and one to shut down the display, when leaving home or bed routine
+
+Refresh Covercast
+```
+sequence:
+  - action: notify.covercast
+    metadata: {}
+    data:
+      message: refreshmusic
+alias: REFRESH-COVERCAST
+description: ""
+```
+Kill Covercast
+```
+sequence:
+  - action: notify.covercast
+    metadata: {}
+    data:
+      message: kill
+alias: KILL-COVERCAST
+description: ""
+```
 
 ## API Usaege
 
