@@ -3,16 +3,20 @@
 function kill_process() {
 
 shell_exec('pkill -f led-image-viewer');
-shell_exec('rm ha_media_artwork.jpg');
-
 sleep(1);
 echo "kill task <BR>";
 }
 
-function display_image($folder) {
+function rmimage() {
+
+shell_exec('rm ha_media_artwork.jpg');
+echo "rm image <BR>";
+}
+
+function display_image($folder,$brightness) {
 shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.jpg');
 echo "Convert Image to square <BR>";
-shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness=40 --led-daemon');
+shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness='.$brightness.' --led-daemon');
 echo "display image<BR>";
 }
 
