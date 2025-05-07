@@ -13,6 +13,23 @@ shell_exec('rm ha_media_artwork.jpg');
 echo "rm image <BR>";
 }
 
+function status() {
+
+$shell = shell_exec('ps -ef | grep led-image-viewer | grep -v grep | wc -l');
+//echo $shell;
+
+if (str_contains($shell, '1')) {
+echo json_encode(['status' => 'on']);
+
+}
+if (str_contains($shell, '0')) {
+echo json_encode(['status' => 'off']);
+
+}
+
+}
+
+
 function display_image($folder,$brightness) {
 shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.jpg');
 echo "Convert Image to square <BR>";
