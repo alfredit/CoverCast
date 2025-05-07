@@ -25,6 +25,14 @@ www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 * back to raspberry, edit settings.php file and add API url, token and music/tv api url 
 * in config.yml, add a notify part :
 ```
+command_line:
+  - switch:
+      name: CoverCast
+      command_on: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=refreshmusic"
+      command_off: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=kill"
+      command_state: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=status"
+      value_template: "{{ value_json.status == 'on' }}"
+
 notify:
   - name: covercast
     platform: rest
@@ -137,28 +145,6 @@ actions:
 mode: single
 ```
 
-You can add those two scripts, one to force refresh the image and one to shut down the display, when leaving home or bed routine
-
-Refresh Covercast
-```
-sequence:
-  - action: notify.covercast
-    metadata: {}
-    data:
-      message: refreshmusic-{{states.input_number.covercast_brightness.state}}
-alias: REFRESH-COVERCAST
-description: ""
-```
-Kill Covercast
-```
-sequence:
-  - action: notify.covercast
-    metadata: {}
-    data:
-      message: kill
-alias: KILL-COVERCAST
-description: ""
-```
 
 ## API Usaege
 
@@ -166,4 +152,4 @@ URL : http://IP_RASPBERRY/CoverCast/app.php?message?=XXXXXXXXX
 * refreshmusic-xx : get the image in the music url in settings and refresh the screen with xx = brightness in 1-99 (refreshmusic-10 for example, default value is 41.)
 * refreshtv-xx : get the image in the tv url in settings and refresh the screen with xx = brightness in 1-99 (refreshtv-10 for example, default value is 41.)
 * kill : turs off the screen
-
+* status : returns the curent status of the screen
