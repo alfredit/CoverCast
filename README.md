@@ -6,7 +6,6 @@ CoverCast enables you to display your music and tv cover from home assistant on 
 * Tested with RPI 4 1GB and Zero 2 w
 * P3 2121 LED 64*64 screen : https://fr.aliexpress.com/item/32931309452.html
 * 5v 3 amp https://fr.aliexpress.com/item/1005005763465796.html
-* Matrix Panel Connector : https://www.electrodragon.com/product/rgb-matrix-panel-drive-board-for-raspberry-pi-v2/
 * Home Assistant ! 
 
 ## Install : 
@@ -163,7 +162,7 @@ description: ""
 
 ## API Usaege
 
-URL : IP_RASPBERRY/CoverCast/app.php?message?=
+URL : http://IP_RASPBERRY/CoverCast/app.php?message?=XXXXXXXXX
 * refreshmusic-xx : get the image in the music url in settings and refresh the screen with xx = brightness in 1-99 (refreshmusic-10 for example, default value is 41.)
 * refreshtv-xx : get the image in the tv url in settings and refresh the screen with xx = brightness in 1-99 (refreshtv-10 for example, default value is 41.)
 * kill : turs off the screen
