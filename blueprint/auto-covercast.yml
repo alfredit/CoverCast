@@ -17,9 +17,16 @@ blueprint:
         entity:
           filter:
             domain: switch
-    covercast-notifier:
-      name: CoverCast notifier
+    music-source:
+      name: Music source
       selector:
         entity:
           filter:
-            domain: notify
+            domain: media_player
+    tv-source:
+      name: TV source
+      selector:
+        entity:
+          filter:
+            domain: media_player
+
