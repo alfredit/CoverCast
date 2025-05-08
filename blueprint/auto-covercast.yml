@@ -2,7 +2,7 @@ blueprint:
   name: Covercast-MGMT
   description: Send a image to covercast
   domain: automation
-  source_url: https://github.com/alfredit/CoverCast/blueprint/auto-covercast.yml
+  source_url: https://raw.githubusercontent.com/alfredit/CoverCast/refs/heads/main/blueprint/auto-covercast.yml
   author: AlfredIT
   input:
     brightness-selector:
