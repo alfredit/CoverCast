@@ -30,3 +30,137 @@ blueprint:
           filter:
             domain: media_player
 
+triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+    alias: brightness-day
+    id: brightness-day
+  - alias: brightness-eco
+    trigger: sun
+    event: sunset
+    offset: 0
+    id: brightness-eco
+  - trigger: state
+    entity_id:
+      - !input music-source
+    to: playing
+    id: TV
+  - trigger: state
+    entity_id:
+      - !input tv-source
+    to: standby
+    id: KILL
+  - trigger: state
+    entity_id:
+      - !input tv-source
+    to: paused
+    id: KILL
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - trigger: state
+    entity_id:
+      - !input music-source
+    enabled: true
+    id: MUSIC
+    to: playing
+  - trigger: state
+    entity_id:
+      - !input music-source
+    to: idle
+    enabled: true
+    id: KILL
+  - trigger: state
+    entity_id:
+      - !input music-source
+    enabled: true
+    id: KILL
+    to: paused
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+conditions:
+  - condition: state
+    entity_id: input_boolean.anyone_home
+    state: "on"
+actions:
+  - alias: MUSIC ON
+    if:
+      - condition: trigger
+        id:
+          - MUSIC
+    then:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshmusic-{{states.input_number.covercast_brightness.state}}
+  - alias: TV ON
+    if:
+      - condition: trigger
+        id:
+          - TV
+    then:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshtv-{{states.input_number.covercast_brightness.state}}
+  - alias: KILL
+    if:
+      - condition: trigger
+        id:
+          - KILL
+    then:
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: kill
+        enabled: false
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.covercast
+  - alias: Brightness-day
+    if:
+      - condition: trigger
+        id:
+          - brightness-day
+    then:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 40
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshbrightness-{{states.input_number.covercast_brightness.state}}
+  - alias: Brightness-eco
+    if:
+      - condition: trigger
+        id:
+          - brightness-eco
+    then:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 15
+      - action: notify.covercast
+        metadata: {}
+        data:
+          message: refreshbrightness-{{states.input_number.covercast_brightness.state}}
+mode: restart
