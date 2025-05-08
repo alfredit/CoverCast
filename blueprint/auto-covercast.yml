@@ -1,0 +1,25 @@
+blueprint:
+  name: Covercast-MGMT
+  description: Send a image to covercast
+  domain: automation
+  source_url: https://github.com/alfredit/CoverCast/blueprint/auto-covercast.yml
+  author: AlfredIT
+  input:
+    brightness-selector:
+      name: Brightness Selector
+      selector:
+        entity:
+          filter:
+            domain: input_number
+    covercast-switch:
+      name: CoverCast switch
+      selector:
+        entity:
+          filter:
+            domain: switch
+    covercast-notifier:
+      name: CoverCast notifier
+      selector:
+        entity:
+          filter:
+            domain: notify
