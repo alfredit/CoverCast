@@ -29,6 +29,40 @@ echo json_encode(['status' => 'off']);
 
 }
 
+function getSpoonCoverImageUrl(string $profileUrl): ?string
+{
+echo $profileUrl;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $profileUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response as a string
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+    $html = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        curl_close($ch);
+        return null;
+    }
+
+    curl_close($ch);
+
+    if (empty($html)) {
+        return null;
+    }
+
+    $pattern = '#https://www\.spoonradio\.com/Cover/.*?\.jpg#';
+
+    if (preg_match($pattern, $html, $matches)) {
+        return $matches[0];
+    }
+
+    return null;
+}
+
+
 
 function display_image($folder,$brightness) {
 shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.jpg');
@@ -42,6 +76,8 @@ function get_ha_image($ha_url, $long_lived_access_token) {
 $output_file = 'ha_media_artwork.jpg';
 
 $ch = curl_init();
+$output_file = 'ha_media_artwork.jpg';
+$output_file = 'ha_media_artwork.jpg';
 
 if ($ch === false) {
     die("Error: Failed to initialize cURL session.\n");

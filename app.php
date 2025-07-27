@@ -4,7 +4,7 @@ require_once 'settings.php';
 require_once 'fonctions.php';
 
 $messge = "";
-$brightness = '41';
+$brightness = '31';
 
 if (isset($_GET["message"])) {
 
@@ -48,6 +48,19 @@ $brightness = (int)$parts[1];
                 kill_process();
                 display_image($folder,$brightness);
         }
+
+        if ($message == "spoon") {
+                echo "refresh Spoonradio<br>";
+                $targetUrl = "https://www.spoonradio.com/";
+                kill_process();
+                rmimage();
+                $long_lived_access_token = "";
+                $imageUrl = getSpoonCoverImageUrl($targetUrl);
+                get_ha_image($imageUrl, $long_lived_access_token);
+                display_image($folder,$brightness);
+        }
+
+
 
 
 }
