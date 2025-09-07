@@ -52,16 +52,31 @@ $brightness = (int)$parts[1];
         if ($message == "spoon") {
                 echo "refresh Spoonradio<br>";
                 $targetUrl = "https://www.spoonradio.com/";
-                kill_process();
-                rmimage();
-                $long_lived_access_token = "";
                 $imageUrl = getSpoonCoverImageUrl($targetUrl);
+                $long_lived_access_token = "";
                 get_ha_image($imageUrl, $long_lived_access_token);
-                display_image($folder,$brightness);
+		$file1 = 'ha_media_artwork.jpg';
+		$file2 = 'ha_media_artwork.new.jpg';
+		if (file_exists($file1) && file_exists($file2)) {
+		    if (md5_file($file1) === md5_file($file2)) {
+			echo "same file, skip<BR>";
+		    } else {
+	        echo "different images, display<BR>";
+        	        kill_process();
+               		rmimage();
+	                display_image($folder,$brightness);
+    }
+}
+else {
+    // Let the user know if a file is missing
+    echo "One or both files not found.<br>";
+    kill_process();
+    display_image($folder,$brightness);
+
+
+}
+
         }
-
-
-
 
 }
 

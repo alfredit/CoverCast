@@ -2,14 +2,14 @@
 
 function kill_process() {
 
-shell_exec('pkill -f led-image-viewer');
+shell_exec('pkill -9 led-image-vi');
 sleep(1);
 echo "kill task <BR>";
 }
 
 function rmimage() {
 
-shell_exec('rm ha_media_artwork.jpg');
+shell_exec('rm ha_media_artwork.final.jpg');
 echo "rm image <BR>";
 }
 
@@ -36,6 +36,8 @@ echo $profileUrl;
     curl_setopt($ch, CURLOPT_URL, $profileUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response as a string
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
+    curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cache-Control: no-cache"));
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -65,19 +67,21 @@ echo $profileUrl;
 
 
 function display_image($folder,$brightness) {
-shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.jpg');
+shell_exec('cp '.$folder.'/ha_media_artwork.new.jpg '.$folder.'/ha_media_artwork.jpg');
+echo "Copy image from $folder/ha_media_artwork.new.jgp to $folder/ha_media_artwork.jpg <BR>";
+shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.final.jpg');
 echo "Convert Image to square <BR>";
-shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.jpg --led-rows=64 --led-cols=64 --led-brightness='.$brightness.' --led-daemon');
+shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.final.jpg --led-rows=64 --led-cols=64 --led-brightness='.$brightness.' --led-daemon');
 echo "display image<BR>";
 }
 
+
+
 function get_ha_image($ha_url, $long_lived_access_token) {
 
-$output_file = 'ha_media_artwork.jpg';
 
 $ch = curl_init();
-$output_file = 'ha_media_artwork.jpg';
-$output_file = 'ha_media_artwork.jpg';
+$output_file = 'ha_media_artwork.new.jpg';
 
 if ($ch === false) {
     die("Error: Failed to initialize cURL session.\n");
