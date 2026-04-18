@@ -9,7 +9,7 @@ echo "kill task <BR>";
 
 function rmimage() {
 
-shell_exec('rm ha_media_artwork.final.jpg');
+shell_exec('rm *.jpg');
 echo "rm image <BR>";
 }
 
@@ -20,12 +20,16 @@ $shell = shell_exec('ps -ef | grep led-image-viewer | grep -v grep | wc -l');
 
 if (str_contains($shell, '1')) {
 echo json_encode(['status' => 'on']);
-
 }
 if (str_contains($shell, '0')) {
 echo json_encode(['status' => 'off']);
-
 }
+if (str_contains($shell, '2')) {
+echo json_encode(['status' => 'on']);
+shell_exec('pkill -9 led-image-vi');
+}
+
+
 
 }
 
