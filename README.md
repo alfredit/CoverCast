@@ -12,12 +12,30 @@ CoverCast enables you to display your music and tv cover from home assistant on 
 
 ### On Raspberry : 
 * clone this repo in /var/www/html/CoverCast
-* cp settings.php.BLANK settings.php
 * visudo, add those lines under the root:ALL : 
 ```
 www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 ```
 * apt install php, apache2, imagemagick
+
+### Apache Configuration
+Configure your Apache VirtualHost with environment variables. Edit your VirtualHost config (e.g., `/etc/apache2/sites-available/000-default.conf`):
+
+```apache
+<VirtualHost *:80>
+    DocumentRoot /var/www/html/CoverCast
+    
+    SetEnv COVERCAST_HA_URL_MUSIC "http://RASPBERRY_IP:8123/api/media_player_proxy/media_player.music"
+    SetEnv COVERCAST_HA_URL_TV "http://RASPBERRY_IP:8123/api/media_player_proxy/media_player.tv"
+    SetEnv COVERCAST_TOKEN "your-long-lived-access-token"
+    SetEnv COVERCAST_FOLDER "/var/www/html/CoverCast"
+</VirtualHost>
+```
+
+Then reload Apache:
+```bash
+sudo systemctl reload apache2
+```
 
 ### On Home Assistant :
 * create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
