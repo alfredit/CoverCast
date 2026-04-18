@@ -1,6 +1,6 @@
 # CoverCast
 
-CoverCast enables you to display your music and tv cover from home assistant on a LED 64*64 screen. This was made with the librery rpi-rgb-led-matrix from hzeller, php and imagemagick.
+CoverCast enables you to display your music and tv cover from home assistant on a LED 64*64 screen. This was made with the library rpi-rgb-led-matrix from hzeller, php and imagemagick.
 
 ## Hardware 
 * Tested with RPI 4 1GB and Zero 2 w
