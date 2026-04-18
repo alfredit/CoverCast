@@ -1,173 +1,272 @@
 # CoverCast
 
-CoverCast enables you to display your music and tv cover from home assistant on a LED 64*64 screen. This was made with the library rpi-rgb-led-matrix from hzeller, php and imagemagick.
+CoverCast enables you to display your music and TV cover art from Home Assistant on a LED 64×64 screen. This project uses the rpi-rgb-led-matrix library from hzeller, PHP, and ImageMagick.
 
-## Hardware 
-* Tested with RPI 4 1GB and Zero 2 w
-* P3 2121 LED 64*64 screen : https://fr.aliexpress.com/item/32931309452.html
-* 5v 3 amp https://fr.aliexpress.com/item/1005005763465796.html
-* Home Assistant ! 
+## Hardware
+* Tested with Raspberry Pi 4 (1GB) and Zero 2 W
+* P3 2121 LED 64×64 screen: https://fr.aliexpress.com/item/32931309452.html
+* 5V 3A power supply: https://fr.aliexpress.com/item/1005005763465796.html
+* Home Assistant!
 
-## Install : 
+## Installation
 
-### On Raspberry : 
-* clone this repo in /var/www/html/CoverCast
-* visudo, add those lines under the root:ALL : 
+### On Raspberry Pi
+
+1. Clone this repository:
+```bash
+cd /var/www/html
+git clone https://github.com/alfredit/CoverCast.git
+git checkout webhook
+```
+
+2. Install dependencies:
+```bash
+sudo apt update
+sudo apt install php apache2 imagemagick
+```
+
+3. Configure sudo permissions for the LED viewer:
+```bash
+sudo visudo
+```
+Add this line under `root ALL=(ALL:ALL) ALL`:
 ```
 www-data ALL=(ALL) NOPASSWD: /var/www/html/CoverCast/led-image-viewer
 ```
-* apt install php, apache2, imagemagick
 
-### Apache Configuration
-Configure your Apache VirtualHost with environment variables. Edit your VirtualHost config (e.g., `/etc/apache2/sites-available/000-default.conf`):
+4. Configure Apache VirtualHost with environment variables:
+
+Edit your VirtualHost configuration (e.g., `/etc/apache2/sites-available/000-default.conf`):
 
 ```apache
 <VirtualHost *:80>
     DocumentRoot /var/www/html/CoverCast
     
-    SetEnv COVERCAST_HA_URL_MUSIC "http://RASPBERRY_IP:8123/api/media_player_proxy/media_player.music"
-    SetEnv COVERCAST_HA_URL_TV "http://RASPBERRY_IP:8123/api/media_player_proxy/media_player.tv"
-    SetEnv COVERCAST_TOKEN "your-long-lived-access-token"
+    # Webhook secret for authentication (generate a random string)
+    SetEnv COVERCAST_WEBHOOK_SECRET "your-random-secret-key-here"
+    
+    # Installation folder
     SetEnv COVERCAST_FOLDER "/var/www/html/CoverCast"
 </VirtualHost>
 ```
 
-Then reload Apache:
+5. Reload Apache:
 ```bash
 sudo systemctl reload apache2
 ```
 
-### On Home Assistant :
-* create a long lived token in user menu / security tab / "Create Token" -> raspberry /CoverCast/get_image.php
-* create a helper : Settings -> devices -> helpers -> type number, name "covercast-brightness" between 1-99. It will set the brightness value for day and eco setting in the automation
-* back to raspberry, edit settings.php file and add API url, token and music/tv api url 
-* in config.yml, add a notify part :
-```
-command_line:
-  - switch:
-      name: CoverCast
-      command_on: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=refreshmusic"
-      command_off: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=kill"
-      command_state: "/usr/bin/curl -X GET http://RASPBERRY_IP/CoverCast/app.php?message=status"
-      value_template: "{{ value_json.status == 'on' }}"
+### Home Assistant Configuration
 
-notify:
-  - name: covercast
-    platform: rest
-    resource: http://RASPBERRY_IP/CoverCast/app.php?message={{ message }}
+#### 1. Create a RESTful Command
+
+Add to your `configuration.yaml`:
+
+```yaml
+rest_command:
+  covercast_display:
+    url: "http://RASPBERRY_IP/CoverCast/webhook.php"
+    method: POST
+    headers:
+      X-Webhook-Secret: "your-random-secret-key-here"
+      Content-Type: "application/json"
+    payload: >
+      {
+        "action": "display",
+        "brightness": {{ brightness | default(31) }},
+        "image": "{{ image_base64 }}"
+      }
+  covercast_kill:
+    url: "http://RASPBERRY_IP/CoverCast/webhook.php"
+    method: POST
+    headers:
+      X-Webhook-Secret: "your-random-secret-key-here"
+      Content-Type: "application/json"
+    payload: '{"action": "kill"}'
 ```
-* create an automation, you may edit the day and eco value of the brihtness and the name of your media_players : 
-```
-alias: MGMT-COVERCAST
-description: ""
-triggers:
-  - trigger: state
-    entity_id:
-      - media_player.maison
-    to: playing
-    enabled: true
-    id: MUSIC
-  - trigger: state
-    entity_id:
-      - media_player.sejour
-    to: playing
-    id: TV
-  - trigger: state
-    entity_id:
-      - media_player.maison
-    to: "off"
-    enabled: true
-    id: KILL
-  - trigger: state
-    entity_id:
-      - media_player.sejour
-    to: standby
-    id: KILL
-  - trigger: sun
-    event: sunrise
-    offset: 0
-    alias: brightness-day
-    id: brightness-day
-  - alias: brightness-eco
-    trigger: sun
-    event: sunset
-    offset: 0
-    id: brightness-eco
-conditions:
-  - condition: state
-    entity_id: input_boolean.anyone_home
-    state: "on"
-actions:
-  - alias: MUSIC ON
-    if:
-      - condition: trigger
-        id:
-          - MUSIC
-    then:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
-      - action: notify.covercast
-        metadata: {}
-        data:
-          message: refreshmusic-{{states.input_number.covercast_brightness.state}}
-  - alias: TV ON
-    if:
-      - condition: trigger
-        id:
-          - TV
-    then:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
-      - action: notify.covercast
-        metadata: {}
-        data:
-          message: refreshtv-{{states.input_number.covercast_brightness.state}}
-  - alias: KILL
-    if:
-      - condition: trigger
-        id:
-          - KILL
-    then:
-      - action: notify.covercast
-        metadata: {}
-        data:
-          message: kill
-  - if:
-      - condition: trigger
-        id:
-          - brightness-day
-    then:
-      - action: input_number.set_value
-        target:
-          entity_id: input_number.covercast_brightness
-        data:
-          value: 40
-    alias: Brightness-day
-  - alias: Brightness-eco
-    if:
-      - condition: trigger
-        id:
-          - brightness-eco
-    then:
-      - action: input_number.set_value
-        target:
-          entity_id: input_number.covercast_brightness
-        data:
-          value: 15
+
+#### 2. Create a Helper for Brightness
+
+Settings → Devices & Services → Helpers → Create Helper
+- Type: Number
+- Name: `covercast_brightness`
+- Min: 1, Max: 99, Step: 1
+
+#### 3. Create Automations
+
+**Automation 1: Display cover art**
+
+```yaml
+alias: CoverCast - Display Cover
 mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - media_player.YOUR_MEDIA_PLAYER
+    to: playing
+action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - service: rest_command.covercast_display
+    data:
+      brightness: "{{ states('input_number.covercast_brightness') | int }}"
+      image_base64: "{{ state_attr('media_player.YOUR_MEDIA_PLAYER', 'entity_picture_local') | regex_replace('^data:image/[^;]+;base64,', '') }}"
 ```
 
+**Note:** If `entity_picture_local` is not available, you may need to download the image and encode it as base64 using a shell command or template sensor.
 
-## API Usaege
+**Alternative using shell command:**
 
-URL : http://IP_RASPBERRY/CoverCast/app.php?message?=XXXXXXXXX
-* refreshmusic-xx : get the image in the music url in settings and refresh the screen with xx = brightness in 1-99 (refreshmusic-10 for example, default value is 41.)
-* refreshtv-xx : get the image in the tv url in settings and refresh the screen with xx = brightness in 1-99 (refreshtv-10 for example, default value is 41.)
-* kill : turs off the screen
-* status : returns the curent status of the screen
+```yaml
+shell_command:
+  covercast_send_cover: >
+    curl -X POST http://RASPBERRY_IP/CoverCast/webhook.php
+    -H "X-Webhook-Secret: your-random-secret-key-here"
+    -H "Content-Type: application/json"
+    -d '{"action":"display","brightness":{{ brightness }},"image":"'$(curl -s http://YOUR_HA_IP:8123{{ state_attr("media_player.YOUR_MEDIA_PLAYER", "entity_picture") }} | base64 -w 0)'"}'
+```
+
+**Automation 2: Turn off display**
+
+```yaml
+alias: CoverCast - Turn Off
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - media_player.YOUR_MEDIA_PLAYER
+    to: "off"
+  - platform: state
+    entity_id:
+      - media_player.YOUR_MEDIA_PLAYER
+    to: "idle"
+action:
+  - service: rest_command.covercast_kill
+```
+
+**Automation 3: Brightness schedule**
+
+```yaml
+alias: CoverCast - Set Day Brightness
+mode: single
+trigger:
+  - platform: sun
+    event: sunrise
+action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.covercast_brightness
+    data:
+      value: 40
+```
+
+```yaml
+alias: CoverCast - Set Night Brightness
+mode: single
+trigger:
+  - platform: sun
+    event: sunset
+action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.covercast_brightness
+    data:
+      value: 15
+```
+
+## Webhook API
+
+### Endpoint
+`POST http://RASPBERRY_IP/CoverCast/webhook.php`
+
+### Headers
+| Header | Value |
+|--------|-------|
+| `X-Webhook-Secret` | Your configured secret |
+| `Content-Type` | `application/json` |
+
+### Actions
+
+#### Display Image
+```json
+{
+  "action": "display",
+  "brightness": 40,
+  "image": "base64encodedimagedata..."
+}
+```
+
+- `action` (required): `"display"`
+- `brightness` (optional): Integer 1-99 (default: 31)
+- `image` (required): Base64-encoded image data (JPEG/PNG)
+
+#### Kill Display
+```json
+{
+  "action": "kill"
+}
+```
+
+- `action` (required): `"kill"`
+
+### Responses
+
+**Success:**
+```json
+{
+  "success": true,
+  "action": "display",
+  "brightness": 40,
+  "image_size": 45230
+}
+```
+
+**Error:**
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid or missing webhook secret"
+}
+```
+
+### Response Codes
+- `200`: Success
+- `400`: Bad Request (invalid JSON, missing parameters)
+- `401`: Unauthorized (invalid secret)
+- `500`: Internal Server Error
+
+## Testing
+
+Test the webhook with curl:
+
+```bash
+# Display test (replace with actual base64 image)
+curl -X POST http://RASPBERRY_IP/CoverCast/webhook.php \
+  -H "X-Webhook-Secret: your-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"display","brightness":40,"image":"base64data..."}'
+
+# Kill display
+curl -X POST http://RASPBERRY_IP/CoverCast/webhook.php \
+  -H "X-Webhook-Secret: your-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"kill"}'
+```
+
+## Troubleshooting
+
+1. **Images not displaying:**
+   - Check Apache error logs: `sudo tail -f /var/log/apache2/error.log`
+   - Verify webhook secret matches between Apache config and Home Assistant
+   - Ensure `www-data` user has sudo access to `led-image-viewer`
+
+2. **Permission errors:**
+   - Verify sudoers entry is correct
+   - Check file permissions in `/var/www/html/CoverCast`
+
+3. **Home Assistant not triggering:**
+   - Test webhook with curl first
+   - Check Home Assistant logs
+   - Verify REST commands are properly formatted

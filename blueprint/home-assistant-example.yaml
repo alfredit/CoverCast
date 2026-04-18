@@ -1,0 +1,127 @@
+# Home Assistant configuration examples for CoverCast webhook integration
+# 
+# IMPORTANT: These are separate configuration snippets. Add each section
+# to its appropriate place in your configuration.yaml
+
+# =============================================================================
+# SECTION 1: Input Number Helper
+# =============================================================================
+input_number:
+  covercast_brightness:
+    name: CoverCast Brightness
+    min: 1
+    max: 99
+    step: 1
+    unit_of_measurement: "%"
+    icon: mdi:brightness-6
+
+# =============================================================================
+# SECTION 2: REST Commands
+# =============================================================================
+rest_command:
+  covercast_display:
+    url: "http://YOUR_RASPBERRY_PI_IP/CoverCast/webhook.php"
+    method: POST
+    headers:
+      X-Webhook-Secret: "YOUR_WEBHOOK_SECRET"
+      Content-Type: "application/json"
+    payload: >
+      {
+        "action": "display",
+        "brightness": {{ brightness | default(31) }},
+        "image": "{{ image_base64 }}"
+      }
+
+  covercast_kill:
+    url: "http://YOUR_RASPBERRY_PI_IP/CoverCast/webhook.php"
+    method: POST
+    headers:
+      X-Webhook-Secret: "YOUR_WEBHOOK_SECRET"
+      Content-Type: "application/json"
+    payload: '{"action": "kill"}'
+
+# =============================================================================
+# SECTION 3: Shell Command (Alternative Method)
+# =============================================================================
+shell_command:
+  covercast_send_cover: >
+    curl -X POST http://YOUR_RASPBERRY_PI_IP/CoverCast/webhook.php
+    -H "X-Webhook-Secret: YOUR_WEBHOOK_SECRET"
+    -H "Content-Type: application/json"
+    -d '{"action":"display","brightness":{{ brightness }},"image":"'$(curl -s http://YOUR_HA_IP:8123{{ state_attr("media_player.YOUR_MEDIA_PLAYER", "entity_picture") }} | base64 -w 0)'"}'
+
+# =============================================================================
+# SECTION 4: Automations
+# =============================================================================
+automation:
+  - alias: CoverCast - Display Cover
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.YOUR_MEDIA_PLAYER
+        to: playing
+    action:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - service: rest_command.covercast_display
+        data:
+          brightness: "{{ states('input_number.covercast_brightness') | int }}"
+          image_base64: "{{ state_attr('media_player.YOUR_MEDIA_PLAYER', 'entity_picture_local') | regex_replace('^data:image/[^;]+;base64,', '') }}"
+
+  - alias: CoverCast - Display Cover (Shell Method)
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.YOUR_MEDIA_PLAYER
+        to: playing
+    action:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - service: shell_command.covercast_send_cover
+        data:
+          brightness: "{{ states('input_number.covercast_brightness') | int }}"
+
+  - alias: CoverCast - Turn Off
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.YOUR_MEDIA_PLAYER
+        to:
+          - "off"
+          - "idle"
+          - "standby"
+    action:
+      - service: rest_command.covercast_kill
+
+  - alias: CoverCast - Set Day Brightness
+    mode: single
+    trigger:
+      - platform: sun
+        event: sunrise
+    action:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 40
+
+  - alias: CoverCast - Set Night Brightness
+    mode: single
+    trigger:
+      - platform: sun
+        event: sunset
+    action:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.covercast_brightness
+        data:
+          value: 15
