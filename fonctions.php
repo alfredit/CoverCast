@@ -72,7 +72,7 @@ echo $profileUrl;
 
 function display_image($folder,$brightness) {
 shell_exec('cp '.$folder.'/ha_media_artwork.new.jpg '.$folder.'/ha_media_artwork.jpg');
-echo "Copy image from $folder/ha_media_artwork.new.jgp to $folder/ha_media_artwork.jpg <BR>";
+echo "Copy image from $folder/ha_media_artwork.new.jpg to $folder/ha_media_artwork.jpg <BR>";
 shell_exec('convert '.$folder.'/ha_media_artwork.jpg -gravity Center -extent 1:1 ha_media_artwork.final.jpg');
 echo "Convert Image to square <BR>";
 shell_exec('sudo '.$folder.'/led-image-viewer -C -f -w3 ha_media_artwork.final.jpg --led-rows=64 --led-cols=64 --led-brightness='.$brightness.' --led-daemon');

@@ -3,7 +3,7 @@
 require_once 'settings.php';
 require_once 'fonctions.php';
 
-$messge = "";
+$message = "";
 $brightness = '31';
 
 if (isset($_GET["message"])) {
